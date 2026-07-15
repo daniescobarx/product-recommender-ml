@@ -1,0 +1,44 @@
+services:
+  mlflow-server:
+    image: ghcr.io/mlflow/mlflow:v2.22.5
+    command:
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+      - --backend-store-uri
+      - sqlite:////mlflow/backend/mlflow.db
+      - --default-artifact-root
+      - /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-backend:/mlflow/backend
+      - mlflow-artifacts:/mlflow/artifacts
+
+  trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mlflow-server
+    env_file:
+      - .env.example
+    environment:
+      ENVIRONMENT: local
+      MLFLOW_TRACKING_URI: http://mlflow-server:5000
+      MLFLOW_EXPERIMENT_NAME: ecommerce-recommender-docker
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./artifacts:/app/artifacts
+      - ./dvc_storage:/app/dvc_storage
+      - dvc-cache:/app/.dvc/cache
+    command: ["poetry", "run", "python", "scripts/validate_env.py"]
+
+volumes:
+  mlflow-backend:
+  mlflow-artifacts:
+  dvc-cache:
