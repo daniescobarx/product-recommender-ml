@@ -19,6 +19,7 @@ data/raw/*
 data/processed/*
 data/interim/*
 !data/raw/.gitkeep
+!data/raw/*.dvc
 !data/processed/.gitkeep
 !data/interim/.gitkeep
 
@@ -28,6 +29,7 @@ artifacts/*
 !artifacts/.gitkeep
 mlruns/
 .dvc/cache/
+dvc_storage/
 
 .codex/
 notebooks/.ipynb_checkpoints/

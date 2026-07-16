@@ -1,0 +1,78 @@
+stages:
+  preprocess:
+    cmd: poetry run python scripts/preprocess.py
+    deps:
+      - scripts/preprocess.py
+      - src/recommender_system/data/loaders.py
+      - src/recommender_system/data/preprocessing.py
+      - src/recommender_system/data/validators.py
+      - data/raw/sample_interactions.csv
+    params:
+      - data.raw_interactions_path
+      - data.interim_interactions_path
+    outs:
+      - data/interim/interactions_clean.csv
+
+  feature_eng:
+    cmd: poetry run python scripts/feature_eng.py
+    deps:
+      - scripts/feature_eng.py
+      - src/recommender_system/data/splitting.py
+      - src/recommender_system/features/builders.py
+      - src/recommender_system/features/encoders.py
+      - data/interim/interactions_clean.csv
+    params:
+      - data.interim_interactions_path
+      - data.train_path
+      - data.validation_path
+      - data.test_path
+      - data.user_mapping_path
+      - data.item_mapping_path
+      - split.validation_size
+      - split.test_size
+      - split.random_seed
+    outs:
+      - data/processed/train.csv
+      - data/processed/validation.csv
+      - data/processed/test.csv
+      - artifacts/mappings/user_mapping.json
+      - artifacts/mappings/item_mapping.json
+
+  train:
+    cmd: poetry run python scripts/train.py
+    deps:
+      - scripts/train.py
+      - src/recommender_system/models/baselines.py
+      - src/recommender_system/models/factory.py
+      - src/recommender_system/tracking/mlflow_tracker.py
+      - data/processed/train.csv
+    params:
+      - data.raw_interactions_path
+      - data.train_path
+      - model.name
+      - model.model_path
+      - model.metadata_path
+      - evaluation.top_k
+    outs:
+      - models/popularity_recommender.pkl
+      - artifacts/model_metadata.json
+
+  evaluate:
+    cmd: poetry run python scripts/evaluate.py
+    deps:
+      - scripts/evaluate.py
+      - src/recommender_system/evaluation/metrics.py
+      - src/recommender_system/tracking/mlflow_tracker.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - models/popularity_recommender.pkl
+    params:
+      - data.train_path
+      - data.test_path
+      - model.name
+      - model.model_path
+      - evaluation.top_k
+      - evaluation.metrics_path
+    metrics:
+      - metrics.json:
+          cache: false

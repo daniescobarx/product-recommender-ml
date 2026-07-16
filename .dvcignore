@@ -1,0 +1,5 @@
+# Add patterns here for files DVC should ignore while scanning the workspace.
+.git/
+.venv/
+.codex/
+mlruns/

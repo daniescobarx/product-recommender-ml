@@ -1,0 +1,22 @@
+data:
+  raw_interactions_path: data/raw/sample_interactions.csv
+  interim_interactions_path: data/interim/interactions_clean.csv
+  train_path: data/processed/train.csv
+  validation_path: data/processed/validation.csv
+  test_path: data/processed/test.csv
+  user_mapping_path: artifacts/mappings/user_mapping.json
+  item_mapping_path: artifacts/mappings/item_mapping.json
+
+split:
+  validation_size: 0.2
+  test_size: 0.2
+  random_seed: 42
+
+model:
+  name: popularity
+  model_path: models/popularity_recommender.pkl
+  metadata_path: artifacts/model_metadata.json
+
+evaluation:
+  top_k: 5
+  metrics_path: metrics.json

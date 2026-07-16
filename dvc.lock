@@ -1,0 +1,199 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: poetry run python scripts/preprocess.py
+    deps:
+    - path: data/raw/sample_interactions.csv
+      hash: md5
+      md5: 1d77868401c23a00b86df9d12143cd44
+      size: 1119
+      isexec: true
+    - path: scripts/preprocess.py
+      hash: md5
+      md5: ad2e8196b94aa1291b82e2d3f370f919
+      size: 1304
+      isexec: true
+    - path: src/recommender_system/data/loaders.py
+      hash: md5
+      md5: 1f63162f019bec4f6c9c3cc67fc17f1a
+      size: 671
+      isexec: true
+    - path: src/recommender_system/data/preprocessing.py
+      hash: md5
+      md5: 3417d0e700e7dc97fb6a7ee7d6216b22
+      size: 4404
+      isexec: true
+    - path: src/recommender_system/data/validators.py
+      hash: md5
+      md5: eac005eba878a541d3e5d21a67fe28fd
+      size: 937
+      isexec: true
+    params:
+      params.yaml:
+        data.interim_interactions_path: data/interim/interactions_clean.csv
+        data.raw_interactions_path: data/raw/sample_interactions.csv
+    outs:
+    - path: data/interim/interactions_clean.csv
+      hash: md5
+      md5: 7f27e32109336366c4afefc3abac79d8
+      size: 1119
+      isexec: true
+  feature_eng:
+    cmd: poetry run python scripts/feature_eng.py
+    deps:
+    - path: data/interim/interactions_clean.csv
+      hash: md5
+      md5: 7f27e32109336366c4afefc3abac79d8
+      size: 1119
+      isexec: true
+    - path: scripts/feature_eng.py
+      hash: md5
+      md5: b51b1a39bfaf9723e2369b2f4177e47c
+      size: 2149
+      isexec: true
+    - path: src/recommender_system/data/splitting.py
+      hash: md5
+      md5: 8aa4cc4fef5f78372548c60434eb8df0
+      size: 1946
+      isexec: true
+    - path: src/recommender_system/features/builders.py
+      hash: md5
+      md5: 73f7bf8f3cb1686b60f1ce52e4dd5f3c
+      size: 1629
+      isexec: true
+    - path: src/recommender_system/features/encoders.py
+      hash: md5
+      md5: 0447e3dac2fa141cc18b7851c964944c
+      size: 1046
+      isexec: true
+    params:
+      params.yaml:
+        data.interim_interactions_path: data/interim/interactions_clean.csv
+        data.item_mapping_path: artifacts/mappings/item_mapping.json
+        data.test_path: data/processed/test.csv
+        data.train_path: data/processed/train.csv
+        data.user_mapping_path: artifacts/mappings/user_mapping.json
+        data.validation_path: data/processed/validation.csv
+        split.random_seed: 42
+        split.test_size: 0.2
+        split.validation_size: 0.2
+    outs:
+    - path: artifacts/mappings/item_mapping.json
+      hash: md5
+      md5: f05cb8290308bf58b1197769204d04d2
+      size: 133
+      isexec: true
+    - path: artifacts/mappings/user_mapping.json
+      hash: md5
+      md5: 473ac6c05ca9372817a9515c3dccfd38
+      size: 133
+      isexec: true
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 8ccf36bb989bb49b8970a7ec6280dfc8
+      size: 332
+      isexec: true
+    - path: data/processed/train.csv
+      hash: md5
+      md5: cc3c33585f8dfe6d756d56ec9b3d8ebc
+      size: 848
+      isexec: true
+    - path: data/processed/validation.csv
+      hash: md5
+      md5: e111a6e219018ca927f458a11e46e117
+      size: 328
+      isexec: true
+  train:
+    cmd: poetry run python scripts/train.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: cc3c33585f8dfe6d756d56ec9b3d8ebc
+      size: 848
+      isexec: true
+    - path: scripts/train.py
+      hash: md5
+      md5: 5f5a720c65313e55660aaf2eae5376bb
+      size: 2652
+      isexec: true
+    - path: src/recommender_system/models/baselines.py
+      hash: md5
+      md5: 05d806457d83b855af914bea85411ea6
+      size: 3188
+      isexec: true
+    - path: src/recommender_system/models/factory.py
+      hash: md5
+      md5: a66509a91a15c99dbdb06152ae2d6145
+      size: 2094
+      isexec: true
+    - path: src/recommender_system/tracking/mlflow_tracker.py
+      hash: md5
+      md5: 800c4cf5a6ea6890503431f2f9e3e955
+      size: 2012
+      isexec: true
+    params:
+      params.yaml:
+        data.raw_interactions_path: data/raw/sample_interactions.csv
+        data.train_path: data/processed/train.csv
+        evaluation.top_k: 5
+        model.metadata_path: artifacts/model_metadata.json
+        model.model_path: models/popularity_recommender.pkl
+        model.name: popularity
+    outs:
+    - path: artifacts/model_metadata.json
+      hash: md5
+      md5: 4c4653c2877c573a9658cfcf3efa8a63
+      size: 193
+      isexec: true
+    - path: models/popularity_recommender.pkl
+      hash: md5
+      md5: 7af98b4ef243b9c5f5b79b1dcbc6f7b5
+      size: 346
+      isexec: true
+  evaluate:
+    cmd: poetry run python scripts/evaluate.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 8ccf36bb989bb49b8970a7ec6280dfc8
+      size: 332
+      isexec: true
+    - path: data/processed/train.csv
+      hash: md5
+      md5: cc3c33585f8dfe6d756d56ec9b3d8ebc
+      size: 848
+      isexec: true
+    - path: models/popularity_recommender.pkl
+      hash: md5
+      md5: 7af98b4ef243b9c5f5b79b1dcbc6f7b5
+      size: 346
+      isexec: true
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: e1abb68b94f20d4f01b9bdffd7c47a5f
+      size: 3105
+      isexec: true
+    - path: src/recommender_system/evaluation/metrics.py
+      hash: md5
+      md5: 8416c3e9a32bd5ce31d2ab5d2e61b9c0
+      size: 4113
+      isexec: true
+    - path: src/recommender_system/tracking/mlflow_tracker.py
+      hash: md5
+      md5: 800c4cf5a6ea6890503431f2f9e3e955
+      size: 2012
+      isexec: true
+    params:
+      params.yaml:
+        data.test_path: data/processed/test.csv
+        data.train_path: data/processed/train.csv
+        evaluation.metrics_path: metrics.json
+        evaluation.top_k: 5
+        model.model_path: models/popularity_recommender.pkl
+        model.name: popularity
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: 76411c944c1c2ff5646035b0b710db51
+      size: 135
+      isexec: true
